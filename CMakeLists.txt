@@ -4,7 +4,7 @@ project(lv220c C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(lv220c source/main.c
-        source/lv220c.c)
+        source/v220_decoder.c)
 
 target_include_directories(lv220c PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

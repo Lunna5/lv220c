@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <lv220c.h>
+#include <v220_decoder.h>
 
 #define COLOR_RESET   "\x1b[0m"
 #define COLOR_BOLD    "\x1b[1m"

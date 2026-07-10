@@ -39,7 +39,7 @@ Plane plane_from_points(Vector3 p1, Vector3 p2, Vector3 p3) {
     Vector3 edge1 = vec_sub(p2, p1);
     Vector3 edge2 = vec_sub(p3, p1);
 
-    p.normal = vec_normalize(vec_cross(edge1, edge2));
+    p.normal = vec_normalize(vec_cross(edge2, edge1));
     p.dist = vec_dot(p.normal, p1);
 
     return p;

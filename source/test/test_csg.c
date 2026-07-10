@@ -28,8 +28,8 @@ void test_plane_math() {
 
     // Plane 1: x = 1 (Normal: 1, 0, 0; Dist: 1)
     Vector3 p1_a = {1.0f, -1.0f, 1.0f};
-    Vector3 p1_b = {1.0f, -1.0f, -1.0f};
-    Vector3 p1_c = {1.0f, 1.0f, -1.0f};
+    Vector3 p1_b = {1.0f, 1.0f, -1.0f};
+    Vector3 p1_c = {1.0f, -1.0f, -1.0f};
     Plane plane1 = plane_from_points(p1_a, p1_b, p1_c);
     
     assert(fabs(plane1.normal.x - 1.0f) < EPSILON);
@@ -39,8 +39,8 @@ void test_plane_math() {
 
     // Plane 2: y = 1 (Normal: 0, 1, 0; Dist: 1)
     Vector3 p2_a = {1.0f, 1.0f, 1.0f};
-    Vector3 p2_b = {1.0f, 1.0f, -1.0f};
-    Vector3 p2_c = {-1.0f, 1.0f, -1.0f};
+    Vector3 p2_b = {-1.0f, 1.0f, -1.0f};
+    Vector3 p2_c = {1.0f, 1.0f, -1.0f};
     Plane plane2 = plane_from_points(p2_a, p2_b, p2_c);
     
     assert(fabs(plane2.normal.x - 0.0f) < EPSILON);
@@ -50,8 +50,8 @@ void test_plane_math() {
 
     // Plane 3: z = 1 (Normal: 0, 0, 1; Dist: 1)
     Vector3 p3_a = {-1.0f, -1.0f, 1.0f};
-    Vector3 p3_b = {1.0f, -1.0f, 1.0f};
-    Vector3 p3_c = {1.0f, 1.0f, 1.0f};
+    Vector3 p3_b = {1.0f, 1.0f, 1.0f};
+    Vector3 p3_c = {1.0f, -1.0f, 1.0f};
     Plane plane3 = plane_from_points(p3_a, p3_b, p3_c);
 
     assert(fabs(plane3.normal.x - 0.0f) < EPSILON);
@@ -79,33 +79,33 @@ void test_planes_to_triangles_conversion() {
 
     // Top face (Y = 1): Normal (0, 1, 0), dist = 1
     faces[0].p1 = (Vector3){1.0f, 1.0f, 1.0f};
-    faces[0].p2 = (Vector3){1.0f, 1.0f, -1.0f};
-    faces[0].p3 = (Vector3){-1.0f, 1.0f, -1.0f};
+    faces[0].p2 = (Vector3){-1.0f, 1.0f, -1.0f};
+    faces[0].p3 = (Vector3){1.0f, 1.0f, -1.0f};
 
     // Bottom face (Y = -1): Normal (0, -1, 0), dist = 1
     faces[1].p1 = (Vector3){-1.0f, -1.0f, -1.0f};
-    faces[1].p2 = (Vector3){1.0f, -1.0f, -1.0f};
-    faces[1].p3 = (Vector3){1.0f, -1.0f, 1.0f};
+    faces[1].p2 = (Vector3){1.0f, -1.0f, 1.0f};
+    faces[1].p3 = (Vector3){1.0f, -1.0f, -1.0f};
 
     // Front face (Z = 1): Normal (0, 0, 1), dist = 1
     faces[2].p1 = (Vector3){-1.0f, -1.0f, 1.0f};
-    faces[2].p2 = (Vector3){1.0f, -1.0f, 1.0f};
-    faces[2].p3 = (Vector3){1.0f, 1.0f, 1.0f};
+    faces[2].p2 = (Vector3){1.0f, 1.0f, 1.0f};
+    faces[2].p3 = (Vector3){1.0f, -1.0f, 1.0f};
 
     // Back face (Z = -1): Normal (0, 0, -1), dist = 1
     faces[3].p1 = (Vector3){1.0f, -1.0f, -1.0f};
-    faces[3].p2 = (Vector3){-1.0f, -1.0f, -1.0f};
-    faces[3].p3 = (Vector3){-1.0f, 1.0f, -1.0f};
+    faces[3].p2 = (Vector3){-1.0f, 1.0f, -1.0f};
+    faces[3].p3 = (Vector3){-1.0f, -1.0f, -1.0f};
 
     // Right face (X = 1): Normal (1, 0, 0), dist = 1
     faces[4].p1 = (Vector3){1.0f, -1.0f, 1.0f};
-    faces[4].p2 = (Vector3){1.0f, -1.0f, -1.0f};
-    faces[4].p3 = (Vector3){1.0f, 1.0f, -1.0f};
+    faces[4].p2 = (Vector3){1.0f, 1.0f, -1.0f};
+    faces[4].p3 = (Vector3){1.0f, -1.0f, -1.0f};
 
     // Left face (X = -1): Normal (-1, 0, 0), dist = 1
     faces[5].p1 = (Vector3){-1.0f, -1.0f, -1.0f};
-    faces[5].p2 = (Vector3){-1.0f, -1.0f, 1.0f};
-    faces[5].p3 = (Vector3){-1.0f, 1.0f, 1.0f};
+    faces[5].p2 = (Vector3){-1.0f, 1.0f, 1.0f};
+    faces[5].p3 = (Vector3){-1.0f, -1.0f, 1.0f};
 
     // Build the brush geometry (computes planes, finds vertices, and sorts them)
     build_brush_geometry(&brush);
@@ -208,33 +208,33 @@ void test_export_map_to_lun() {
     // Set up 6 faces for the cube
     // Face 0: Top (Y = 1)
     brush->faces[0].p1 = (Vector3){1.0f, 1.0f, 1.0f};
-    brush->faces[0].p2 = (Vector3){1.0f, 1.0f, -1.0f};
-    brush->faces[0].p3 = (Vector3){-1.0f, 1.0f, -1.0f};
+    brush->faces[0].p2 = (Vector3){-1.0f, 1.0f, -1.0f};
+    brush->faces[0].p3 = (Vector3){1.0f, 1.0f, -1.0f};
 
     // Face 1: Bottom (Y = -1)
     brush->faces[1].p1 = (Vector3){-1.0f, -1.0f, -1.0f};
-    brush->faces[1].p2 = (Vector3){1.0f, -1.0f, -1.0f};
-    brush->faces[1].p3 = (Vector3){1.0f, -1.0f, 1.0f};
+    brush->faces[1].p2 = (Vector3){1.0f, -1.0f, 1.0f};
+    brush->faces[1].p3 = (Vector3){1.0f, -1.0f, -1.0f};
 
     // Face 2: Front (Z = 1)
     brush->faces[2].p1 = (Vector3){-1.0f, -1.0f, 1.0f};
-    brush->faces[2].p2 = (Vector3){1.0f, -1.0f, 1.0f};
-    brush->faces[2].p3 = (Vector3){1.0f, 1.0f, 1.0f};
+    brush->faces[2].p2 = (Vector3){1.0f, 1.0f, 1.0f};
+    brush->faces[2].p3 = (Vector3){1.0f, -1.0f, 1.0f};
 
     // Face 3: Back (Z = -1)
     brush->faces[3].p1 = (Vector3){1.0f, -1.0f, -1.0f};
-    brush->faces[3].p2 = (Vector3){-1.0f, -1.0f, -1.0f};
-    brush->faces[3].p3 = (Vector3){-1.0f, 1.0f, -1.0f};
+    brush->faces[3].p2 = (Vector3){-1.0f, 1.0f, -1.0f};
+    brush->faces[3].p3 = (Vector3){-1.0f, -1.0f, -1.0f};
 
     // Face 4: Right (X = 1)
     brush->faces[4].p1 = (Vector3){1.0f, -1.0f, 1.0f};
-    brush->faces[4].p2 = (Vector3){1.0f, -1.0f, -1.0f};
-    brush->faces[4].p3 = (Vector3){1.0f, 1.0f, -1.0f};
+    brush->faces[4].p2 = (Vector3){1.0f, 1.0f, -1.0f};
+    brush->faces[4].p3 = (Vector3){1.0f, -1.0f, -1.0f};
 
     // Face 5: Left (X = -1)
     brush->faces[5].p1 = (Vector3){-1.0f, -1.0f, -1.0f};
-    brush->faces[5].p2 = (Vector3){-1.0f, -1.0f, 1.0f};
-    brush->faces[5].p3 = (Vector3){-1.0f, 1.0f, 1.0f};
+    brush->faces[5].p2 = (Vector3){-1.0f, 1.0f, 1.0f};
+    brush->faces[5].p3 = (Vector3){-1.0f, -1.0f, 1.0f};
 
     for (int i = 0; i < 6; i++) {
         strcpy(brush->faces[i].texture, "textures/test_tex");

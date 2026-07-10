@@ -3,9 +3,11 @@
 #include <math.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <string.h>
 #include <map_transformer.h>
 #include <v220_decoder.h>
 #include <lmath.h>
+#include <lun_file.h>
 
 #define COLOR_RESET   "\x1b[0m"
 #define COLOR_BOLD    "\x1b[1m"
@@ -172,11 +174,124 @@ void test_planes_to_triangles_conversion() {
     printf(COLOR_GREEN "test_planes_to_triangles_conversion() passed!\n" COLOR_RESET);
 }
 
+void test_export_map_to_lun() {
+    printf(COLOR_CYAN "Running test_export_map_to_lun()...\n" COLOR_RESET);
+
+    Map mock_map = {0};
+    mock_map.entity_count = 1;
+    mock_map.entities = malloc(sizeof(Entity) * 1);
+    memset(mock_map.entities, 0, sizeof(Entity) * 1);
+
+    Entity *ent = &mock_map.entities[0];
+    ent->property_count = 3;
+    ent->properties = malloc(sizeof(Property) * 3);
+    memset(ent->properties, 0, sizeof(Property) * 3);
+    
+    strcpy(ent->properties[0].key, "classname");
+    strcpy(ent->properties[0].value, "info_player_start;2"); // Type 2
+    
+    strcpy(ent->properties[1].key, "origin");
+    strcpy(ent->properties[1].value, "10.0 20.0 -30.0");
+    
+    strcpy(ent->properties[2].key, "angle");
+    strcpy(ent->properties[2].value, "90");
+
+    ent->brush_count = 1;
+    ent->brushes = malloc(sizeof(Brush) * 1);
+    memset(ent->brushes, 0, sizeof(Brush) * 1);
+
+    Brush *brush = &ent->brushes[0];
+    brush->face_count = 6;
+    brush->faces = malloc(sizeof(Face) * 6);
+    memset(brush->faces, 0, sizeof(Face) * 6);
+
+    // Set up 6 faces for the cube
+    // Face 0: Top (Y = 1)
+    brush->faces[0].p1 = (Vector3){1.0f, 1.0f, 1.0f};
+    brush->faces[0].p2 = (Vector3){1.0f, 1.0f, -1.0f};
+    brush->faces[0].p3 = (Vector3){-1.0f, 1.0f, -1.0f};
+
+    // Face 1: Bottom (Y = -1)
+    brush->faces[1].p1 = (Vector3){-1.0f, -1.0f, -1.0f};
+    brush->faces[1].p2 = (Vector3){1.0f, -1.0f, -1.0f};
+    brush->faces[1].p3 = (Vector3){1.0f, -1.0f, 1.0f};
+
+    // Face 2: Front (Z = 1)
+    brush->faces[2].p1 = (Vector3){-1.0f, -1.0f, 1.0f};
+    brush->faces[2].p2 = (Vector3){1.0f, -1.0f, 1.0f};
+    brush->faces[2].p3 = (Vector3){1.0f, 1.0f, 1.0f};
+
+    // Face 3: Back (Z = -1)
+    brush->faces[3].p1 = (Vector3){1.0f, -1.0f, -1.0f};
+    brush->faces[3].p2 = (Vector3){-1.0f, -1.0f, -1.0f};
+    brush->faces[3].p3 = (Vector3){-1.0f, 1.0f, -1.0f};
+
+    // Face 4: Right (X = 1)
+    brush->faces[4].p1 = (Vector3){1.0f, -1.0f, 1.0f};
+    brush->faces[4].p2 = (Vector3){1.0f, -1.0f, -1.0f};
+    brush->faces[4].p3 = (Vector3){1.0f, 1.0f, -1.0f};
+
+    // Face 5: Left (X = -1)
+    brush->faces[5].p1 = (Vector3){-1.0f, -1.0f, -1.0f};
+    brush->faces[5].p2 = (Vector3){-1.0f, -1.0f, 1.0f};
+    brush->faces[5].p3 = (Vector3){-1.0f, 1.0f, 1.0f};
+
+    for (int i = 0; i < 6; i++) {
+        strcpy(brush->faces[i].texture, "textures/test_tex");
+        brush->faces[i].u.x = 1.0f;
+        brush->faces[i].v.y = 1.0f;
+        brush->faces[i].u_scale = 1.0f;
+        brush->faces[i].v_scale = 1.0f;
+    }
+
+    const char *test_filepath = "test_export.lun";
+    bool success = export_map_to_lun(test_filepath, &mock_map);
+    assert(success);
+
+    // Read the file back and verify
+    FILE *file = fopen(test_filepath, "rb");
+    assert(file != NULL);
+
+    LunHeader header;
+    size_t read_bytes = fread(&header, sizeof(LunHeader), 1, file);
+    assert(read_bytes == 1);
+
+    assert(strncmp(header.magic, "LUNN", 4) == 0);
+    assert(header.version == 1);
+    assert(header.num_entities == 1);
+    assert(header.num_textures == 1);
+    assert(header.num_vertices == 8);
+    assert(header.num_faces == 12);
+
+    // Verify entity data
+    fseek(file, header.offset_entities, SEEK_SET);
+    LunEntity out_ent;
+    read_bytes = fread(&out_ent, sizeof(LunEntity), 1, file);
+    assert(read_bytes == 1);
+    assert(out_ent.type == 2);
+    assert(out_ent.angle == 90);
+    assert(out_ent.x == float_to_fix32_ds(10.0f));
+    assert(out_ent.y == float_to_fix32_ds(20.0f));
+    assert(out_ent.z == float_to_fix32_ds(-30.0f));
+
+    fclose(file);
+    remove(test_filepath);
+
+    // Free resources
+    free(brush->faces);
+    free(ent->brushes);
+    free(ent->properties);
+    free(mock_map.entities);
+
+    printf(COLOR_GREEN "test_export_map_to_lun() passed!\n" COLOR_RESET);
+}
+
 int main() {
     printf(COLOR_BOLD "=== Lunna Engine CSG Conversion Tests ===\n" COLOR_RESET);
     
     test_plane_math();
     test_planes_to_triangles_conversion();
+    test_export_map_to_lun();
 
     printf(COLOR_BOLD COLOR_GREEN "\nALL TESTS PASSED SUCCESSFULLY!\n" COLOR_RESET);
     return 0;

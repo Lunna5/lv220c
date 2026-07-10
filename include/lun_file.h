@@ -43,16 +43,21 @@ typedef struct {
     fixed16 v[3];
 
     uint16_t texture_id;
-};
+} LunFace;
+
+#include <stdbool.h>
+#include <v220_decoder.h>
 
 typedef struct {
     uint8_t type;
+    uint8_t padding; // Padding for security on ARM9 architecture
+    int16_t angle;
     fixed32 x, y, z;
 
     uint16_t param1;
     uint16_t param2;
 } LunEntity;
 
-
+bool export_map_to_lun(const char *filepath, Map *src_map);
 
 #endif //LV220C_LUN_FILE_H

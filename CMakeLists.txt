@@ -9,6 +9,7 @@ add_library(lv220c_core STATIC
     source/lmath.c
     source/v220_decoder.c
     source/map_transformer.c
+    source/lun_file.c
     include/lmath.h
     include/v220_decoder.h
     include/map_transformer.h

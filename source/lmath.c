@@ -1,8 +1,5 @@
 #include <math.h>
-#include <float.h>
-
 #include <lmath.h>
-
 
 Vector3 vec_sub(Vector3 a, Vector3 b) {
     return (Vector3){a.x - b.x, a.y - b.y, a.z - b.z};
@@ -56,7 +53,7 @@ bool intersect_3_planes(Plane p1, Plane p2, Plane p3, Vector3* out_point) {
     Vector3 n2_cross_n3 = vec_cross(n2, n3);
     float det = vec_dot(n1, n2_cross_n3);
 
-    if (fabs(det) < FLT_EPSILON) {
+    if (fabs(det) < EPSILON) {
         return false;
     }
 
@@ -65,14 +62,15 @@ bool intersect_3_planes(Plane p1, Plane p2, Plane p3, Vector3* out_point) {
 
     Vector3 term1 = vec_scale(n2_cross_n3, p1.dist);
     Vector3 term2 = vec_scale(n3_cross_n1, p2.dist);
-    Vector3 term3 = vec_scale(n1_cross_n2, p1.dist);
+    Vector3 term3 = vec_scale(n1_cross_n2, p3.dist);
 
     Vector3 sum12 = vec_add(term1, term2);
     Vector3 sum123 = vec_add(sum12, term3);
 
-    out_point->x = sum12.x;
-    out_point->y = sum12.y;
-    out_point->z = sum12.z;
+    Vector3 intersection = vec_scale(sum123, 1.0f / det);
+    out_point->x = intersection.x;
+    out_point->y = intersection.y;
+    out_point->z = intersection.z;
 
     return true;
 }

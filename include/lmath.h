@@ -6,6 +6,7 @@
 #define LV220C_LMATH_H
 #include <stdbool.h>
 #include <stdint.h>
+#define EPSILON 0.001f
 
 typedef int32_t fixed32;
 typedef int16_t fixed16;

@@ -2,6 +2,10 @@
 // Created by lunna on 10/7/26.
 //
 #include <v220_decoder.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
 
 void init_map(Map *map) {
     map->entity_count = 0;

@@ -1,15 +1,41 @@
-cmake_minimum_required(VERSION 4.2)
+cmake_minimum_required(VERSION 3.15)
 project(lv220c C)
 
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
-find_library(LIBM m)
+add_library(lv220c_core STATIC
+    source/lmath.c
+    source/v220_decoder.c
+    source/map_transformer.c
+    include/lmath.h
+    include/v220_decoder.h
+    include/map_transformer.h
+    include/lun_file.h
+)
 
-add_executable(lv220c source/main.c
-        source/v220_decoder.c
-        source/lmath.c)
+target_include_directories(lv220c_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_include_directories(lv220c PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(lv220c ${LIBM})
+if(MSVC)
+    target_compile_options(lv220c_core PRIVATE /W4)
+else()
+    target_compile_options(lv220c_core PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+find_library(MATH_LIBRARY m)
+if(MATH_LIBRARY)
+    target_link_libraries(lv220c_core PRIVATE ${MATH_LIBRARY})
+endif()
+
+add_executable(lv220c source/main.c)
+target_link_libraries(lv220c PRIVATE lv220c_core)
 
 install(TARGETS lv220c DESTINATION bin)
+
+enable_testing()
+
+add_executable(test_csg source/test/test_csg.c)
+target_link_libraries(test_csg PRIVATE lv220c_core)
+
+add_test(NAME CSG_Math_Test COMMAND test_csg)

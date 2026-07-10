@@ -2,5 +2,6 @@
 .idea/
 
 # CMake build directories
-cmake-build-debug
-cmake-build-release
+cmake-build-debug/
+cmake-build-release/
+build/

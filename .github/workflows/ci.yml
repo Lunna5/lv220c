@@ -1,0 +1,121 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # 1. Linux Builds
+  linux-builds:
+    name: Linux (${{ matrix.arch }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, arm64]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      if: matrix.arch == 'arm64'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-aarch64-linux-gnu
+
+    - name: Configure CMake (x86_64)
+      if: matrix.arch == 'x86_64'
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+    - name: Configure CMake (ARM64)
+      if: matrix.arch == 'arm64'
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
+          -DCMAKE_SYSTEM_NAME=Linux \
+          -DCMAKE_SYSTEM_PROCESSOR=aarch64
+
+    - name: Build
+      run: cmake --build build --config Release
+
+    - name: Run Tests (x86_64 only)
+      if: matrix.arch == 'x86_64'
+      working-directory: ${{ github.workspace }}/build
+      run: ctest -C Release --output-on-failure
+
+    - name: Prepare Artifact
+      run: |
+        mkdir -p dist
+        cp build/lv220c dist/lv220c-linux-${{ matrix.arch }}
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lv220c-linux-${{ matrix.arch }}
+        path: dist/lv220c-linux-${{ matrix.arch }}
+
+  # 2. Windows Builds
+  windows-builds:
+    name: Windows (${{ matrix.arch }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: cmake -B build -A ${{ matrix.arch }} -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build
+      run: cmake --build build --config Release
+
+    - name: Run Tests (x64 only)
+      if: matrix.arch == 'x64'
+      working-directory: ${{ github.workspace }}/build
+      run: ctest -C Release --output-on-failure
+
+    - name: Prepare Artifact
+      shell: bash
+      run: |
+        mkdir -p dist
+        cp build/Release/lv220c.exe dist/lv220c-windows-${{ matrix.arch }}.exe
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lv220c-windows-${{ matrix.arch }}
+        path: dist/lv220c-windows-${{ matrix.arch }}.exe
+
+  # 3. macOS Builds
+  macos-build:
+    name: macOS (Universal x86_64/ARM64)
+    runs-on: macos-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Configure CMake (Universal Binary)
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+
+    - name: Build
+      run: cmake --build build --config Release
+
+    - name: Run Tests (Universal binary runs natively on macOS runner architecture)
+      working-directory: ${{ github.workspace }}/build
+      run: ctest -C Release --output-on-failure
+
+    - name: Prepare Artifact
+      run: |
+        mkdir -p dist
+        cp build/lv220c dist/lv220c-macos-universal
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: lv220c-macos-universal
+        path: dist/lv220c-macos-universal

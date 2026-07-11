@@ -1,10 +1,17 @@
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
 #define _POSIX_C_SOURCE 199309L
+#include <time.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <v220_decoder.h>
 #include <lun_file.h>
-#include <time.h>
 
 #define COLOR_RESET   "\x1b[0m"
 #define COLOR_BOLD    "\x1b[1m"
@@ -48,9 +55,15 @@ char* get_default_output_filename(const char* input_path) {
 int main(int argc, char **argv) {
     const char *input_file = NULL;
     const char *output_file = NULL;
+#ifdef _WIN32
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER start, finish;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&start);
+#else
     struct timespec start, finish;
-
     clock_gettime(CLOCK_MONOTONIC, &start);
+#endif
 
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
@@ -110,8 +123,13 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+#ifdef _WIN32
+    QueryPerformanceCounter(&finish);
+    double time_ms = (double)(finish.QuadPart - start.QuadPart) * 1000.0 / frequency.QuadPart;
+#else
     clock_gettime(CLOCK_MONOTONIC, &finish);
     double time_ms = (finish.tv_sec - start.tv_sec) * 1000.0 + (finish.tv_nsec - start.tv_nsec) / 1000000.0;
+#endif
 
     printf(COLOR_GREEN COLOR_BOLD "Successfully compiled %s to %s in %.2f ms!\n" COLOR_RESET, input_file, output_file, time_ms);
 

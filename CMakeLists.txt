@@ -29,7 +29,12 @@ if(MATH_LIBRARY)
     target_link_libraries(lv220c_core PRIVATE ${MATH_LIBRARY})
 endif()
 
-target_link_libraries(lv220c_core PRIVATE rt)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_library(RT_LIBRARY rt)
+    if(RT_LIBRARY)
+        target_link_libraries(lv220c_core PRIVATE ${RT_LIBRARY})
+    endif()
+endif()
 
 add_executable(lv220c source/main.c)
 target_link_libraries(lv220c PRIVATE lv220c_core)
